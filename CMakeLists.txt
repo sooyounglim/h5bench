@@ -106,6 +106,42 @@ endif()
 
 message(STATUS "HDF5 VOL ASYNC: ${WITH_ASYNC_VOL}")
 
+# Support DAOS VOL ############################################################
+#
+# https://github.com/sooyounglim/h5bench
+
+add_library(h5bench_daos_iface INTERFACE)
+
+# DAOS core
+if(DEFINED ENV{DAOS_INSTALL_PREFIX})
+    target_include_directories(h5bench_daos_iface INTERFACE
+        $ENV{DAOS_INSTALL_PREFIX}/include
+    )
+    target_link_directories(h5bench_daos_iface INTERFACE
+        $ENV{DAOS_INSTALL_PREFIX}/lib
+        $ENV{DAOS_INSTALL_PREFIX}/lib64
+    )
+else()
+    message(WARNING "DAOS_INSTALL_PREFIX environment variable is not set")
+endif()
+
+# DAOS VOL
+if(DEFINED ENV{DAOS_VOL_INSTALL_PREFIX})
+    target_include_directories(h5bench_daos_iface INTERFACE
+        $ENV{DAOS_VOL_INSTALL_PREFIX}/include
+    )
+    target_link_directories(h5bench_daos_iface INTERFACE
+        $ENV{DAOS_VOL_INSTALL_PREFIX}/lib
+    )
+else()
+    message(WARNING "DAOS_VOL_INSTALL_PREFIX environment variable is not set")
+endif()
+
+target_link_libraries(h5bench_daos_iface INTERFACE
+    hdf5_vol_daos
+    uuid
+)
+
 # h5bench Utility #############################################################
 #
 
@@ -134,7 +170,7 @@ target_link_libraries(h5bench_write_var_normal_dist h5bench_util hdf5 z m ${CMAK
 set(h5bench_write_src h5bench_patterns/h5bench_write.c)
 
 add_executable(h5bench_write ${h5bench_write_src})
-target_link_libraries(h5bench_write h5bench_util hdf5 z ${CMAKE_DL_LIBS} MPI::MPI_C) 
+target_link_libraries(h5bench_write h5bench_daos_iface h5bench_util hdf5 z ${CMAKE_DL_LIBS} MPI::MPI_C) 
 
 # h5bench WRITE UNLIMITED #####################################################
 #
@@ -166,7 +202,7 @@ target_link_libraries(h5bench_append h5bench_util hdf5 z ${CMAKE_DL_LIBS} MPI::M
 set(h5bench_read_src h5bench_patterns/h5bench_read.c)
 
 add_executable(h5bench_read ${h5bench_read_src})
-target_link_libraries(h5bench_read h5bench_util hdf5 z ${CMAKE_DL_LIBS} MPI::MPI_C)
+target_link_libraries(h5bench_read h5bench_daos_iface h5bench_util hdf5 z ${CMAKE_DL_LIBS} MPI::MPI_C)
 
 
 # Exerciser ###################################################################

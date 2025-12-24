@@ -38,6 +38,7 @@
 //
 
 #include <hdf5.h>
+#include "daos_vol.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -1074,7 +1075,8 @@ main(int argc, char *argv[])
             H5Pset_fapl_subfiling(fapl, NULL);
         else
 #endif
-            H5Pset_fapl_mpio(fapl, comm, info);
+            // H5Pset_fapl_mpio(fapl, comm, info);
+	    H5Pset_fapl_daos(fapl, getenv("DAOS_POOL"), NULL);
         set_metadata(fapl, ALIGN, ALIGN_THRESHOLD, ALIGN_LEN, params.meta_coll);
     }
 
